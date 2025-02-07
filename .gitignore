@@ -1,0 +1,8 @@
+env-*
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ruff_ignore/
+.ruff_output/
+.ruff_cache/
+__pycache__/
