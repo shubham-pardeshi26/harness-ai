@@ -1,0 +1,57 @@
+pipeline:
+  name: pipeline-ai-test
+  identifier: pipelineaitest
+  projectIdentifier: RnDai
+  orgIdentifier: default
+  tags: {}
+
+  stages:
+    - stage:
+        name: Build
+        identifier: Build
+        type: CI
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: Checkout Code
+                  identifier: checkout_code
+                  type: GitClone
+                  spec:
+                    connectorRef: shubham-pardeshi26
+                    repoName: harness-ai
+                    branch: master
+
+              - step:
+                  name: Install Dependencies
+                  identifier: install_dependencies
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      pip install -r requirements.txt
+
+              - step:
+                  name: Run Tests
+                  identifier: run_tests
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      pytest > test_results.log
+
+    - stage:
+        name: Deploy
+        identifier: Deploy
+        type: CD
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: Deploy FastAPI
+                  identifier: deploy_fastapi
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      uvicorn main:app --host 0.0.0.0 --port 8000
