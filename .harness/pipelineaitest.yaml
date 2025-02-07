@@ -1,0 +1,64 @@
+pipeline:
+  name: pipeline-ai-test
+  identifier: pipelineaitest
+  projectIdentifier: RnDai
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: shubhampardeshi26
+        repoName: harness-ai
+        build: <+input>
+  stages:
+    - stage:
+        name: Checkout Code
+        identifier: Checkout_Code
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Windows
+            arch: Amd64
+          runtime:
+            type: Docker
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: GitClone
+                  name: GitClone_1
+                  identifier: GitClone_1
+                  spec:
+                    connectorRef: shubhampardeshi26
+                    repoName: harness-ai
+                    cloneDirectory: <+input>
+                    build:
+                      type: branch
+                      spec:
+                        branch: <+input>
+              - step:
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
+                  spec:
+                    shell: Python
+                    command: pip install -r requirements.txt
+                  description: Install Requirements.txt
+              - step:
+                  type: Run
+                  name: Run_2
+                  identifier: Run_2
+                  spec:
+                    shell: Python
+                    command: pytest > final_test_report.logs
+                  description: Test cases
+              - step:
+                  type: Run
+                  name: Run_3
+                  identifier: Run_3
+                  spec:
+                    shell: Python
+                    command: uvicorn main:app
+                  description: This is deploy the application using Uvicorn server.
