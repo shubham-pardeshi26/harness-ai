@@ -1,0 +1,8 @@
+environment:
+  name: newEnv
+  identifier: newEnv
+  description: ""
+  tags: {}
+  type: PreProduction
+  orgIdentifier: default
+  projectIdentifier: RnDai
