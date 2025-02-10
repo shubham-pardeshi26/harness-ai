@@ -54,11 +54,74 @@ pipeline:
                     shell: Python
                     command: pytest > final_test_report.logs
                   description: Test cases
+        delegateSelectors:
+          - docker-delegate-local
+        failureStrategies:
+          - onFailure:
+              errors: []
+              action:
+                type: MarkAsFailure
+    - stage:
+        name: approval
+        identifier: approval
+        description: ""
+        type: Approval
+        spec:
+          execution:
+            steps:
               - step:
-                  type: Run
-                  name: Run_3
-                  identifier: Run_3
+                  type: CustomApproval
+                  name: TL approval
+                  identifier: TL_approval
+                  timeout: 1d
                   spec:
-                    shell: Python
-                    command: uvicorn main:app
-                  description: This is deploy the application using Uvicorn server.
+                    shell: Bash
+                    retryInterval: 10s
+                    scriptTimeout: 10m
+                    source:
+                      type: Inline
+                      spec:
+                        script: |
+                          #!/bin/bash
+
+                          read -p "Are you TL? (yes/no): " is_tl
+
+                          if [ "$is_tl" == "yes" ]; then
+                              read -p "Do you want to deploy? (yes/no): " deploy
+                              if [ "$deploy" == "yes" ]; then
+                                  echo "true"
+                                  exit 0
+                              else
+                                  echo "false"
+                                  exit 1
+                              fi
+                          else
+                              echo "false"
+                              exit 1
+                          fi
+                    environmentVariables: []
+                    approvalCriteria:
+                      type: KeyValues
+                      spec:
+                        matchAnyCondition: false
+                        conditions:
+                          - key: deploy
+                            operator: equals
+                            value: "yes"
+                    rejectionCriteria:
+                      type: KeyValues
+                      spec:
+                        matchAnyCondition: false
+                        conditions: []
+                    onDelegate: true
+                    outputVariables:
+                      - name: is_tl
+                        type: String
+                        value: "no"
+                    delegateSelectors:
+                      - docker-delegate-local
+        tags: {}
+        delegateSelectors:
+          - docker-delegate-local
+        when:
+          pipelineStatus: Success
